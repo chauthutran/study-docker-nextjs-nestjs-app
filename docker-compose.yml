@@ -1,0 +1,34 @@
+#version: '3.9'
+
+services:
+  next-simple-app:
+    build:
+      context: ./next-simple-app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - nest-simple-service
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001/data #The REACT_APP_API_URL in the React app points to the NestJS service.
+      
+  nest-simple-service:
+    build:
+      context: ./nest-simple-service
+    ports:
+      - "3001:3001" #The first 3001 maps to your host machine, and the second 3001 maps to the container.
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/mydatabase #The MONGO_URI in the NestJS service points to the MongoDB container.
+
+  mongodb:
+    image: mongo:6 # Number "6" specifies the version tag of the mongo image. It refers to MongoDB version 6.x.x.
+    container_name: mongodb # we can put any name here
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
